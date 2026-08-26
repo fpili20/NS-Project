@@ -1,0 +1,9 @@
+# Ignore all .csv files in the data directory
+data/*.csv
+
+# Ignore cache directory of python
+__pycache__/
+*.pyc
+
+# Ignore system files
+.DS_Store
