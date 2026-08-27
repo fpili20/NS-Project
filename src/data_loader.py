@@ -28,6 +28,22 @@ def load_and_preprocess(file_path=None):
 
         print(f"[Data Loader] Dataset caricato! Dimensioni: {traffic_df.shape}")
 
+        proto_col = config.PROTO_COL
+        traffic_df[proto_col] = traffic_df[proto_col].astype(str).str.lower().str.strip()
+
+        # Filtriamo il DataFrame tenendo solo i tre protocolli di interesse
+        protocols_target = ['tcp', 'udp', 'icmp']
+        traffic_df = traffic_df[traffic_df[proto_col].isin(protocols_target)].copy()
+
+        print(f"[Data Loader] Dimensioni dopo il filtro TCP/UDP/ICMP: {traffic_df.shape}")
+
+        # Stampa in console la quantità dei protocolli filtrati
+        print("\n--- Quantità dei Protocolli (Solo TCP, UDP, ICMP) ---")
+        proto_counts = traffic_df[proto_col].value_counts()
+        for proto, count in proto_counts.items():
+            print(f"  - {str(proto).upper()}: {count} pacchetti")
+        print("---------------------------------------------------\n")
+
         # Shuffling per evitare pattern sequenziali
         traffic_df = traffic_df.sample(frac=1, random_state=42).reset_index(drop=True)
 
