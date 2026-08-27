@@ -32,9 +32,30 @@ def main():
     all_features = feat_normal + feat_malevolent
     true_labels = ["Benevolent"] * len(feat_normal) + ["Malevolent"] * len(feat_malevolent)
 
-    # 5. Ottimizzazione Soglia Automatica (senza guardare il grafico)
-    print("\n--- Avvio Ottimizzatore ---")
-    optimal_tcp_thresh = find_best_threshold(all_features, true_labels, protocol='tcp')
+    # 5. Ottimizzazione Soglia Automatica e Generazione Grafici
+    print("\n--- Avvio Ottimizzatore Analitico ---")
+
+    # Calcolo soglia TCP e salvataggio grafico
+    optimal_tcp_thresh = find_best_threshold(all_features, true_labels, protocol='tcp', show_plot=True)
+
+    # Calcolo soglia UDP e salvataggio grafico
+    optimal_udp_thresh = find_best_threshold(all_features, true_labels, protocol='udp', show_plot=True)
+
+    # Calcolo soglia ICMP e salvataggio grafico
+    optimal_icmp_thresh = find_best_threshold(all_features, true_labels, protocol='icmp', show_plot=True)
+
+    # 6. Classificazione con il Multi-Threshold (che hai in classifiers.py)
+    print("\n--- Classificazione Multi-Soglia Combinata ---")
+
+    # Prepariamo il dizionario delle soglie da passare al classificatore
+    dynamic_thresholds = {
+        'tcp': optimal_tcp_thresh,
+        'udp': optimal_udp_thresh,
+        'icmp': optimal_icmp_thresh
+    }
+
+    # Ora passiamo a classify_multi sia le feature che le 3 soglie calcolate dinamicamente
+    # predictions = [classify_multi(f, dynamic_thresholds) for f in all_features]
 
     # 6. Classificazione con la soglia ottimizzata
     print(f"\n--- Classificazione (Soglia TCP: {optimal_tcp_thresh}) ---")

@@ -17,10 +17,3 @@ CATEGORY_MAPPING = {
     'scanning': 'Malevolent',
     'xss': 'Malevolent'
 }
-
-# Soglie di default (verranno poi sovrascritte dall'optimizer)
-DEFAULT_THRESHOLDS = {
-    'tcp': 0.70,
-    'udp': 0.20,
-    'icmp': 0.10
-}
