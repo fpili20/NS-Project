@@ -38,3 +38,24 @@ print(f"Metodo 1 - Il DataFrame clean_df contiene: {numero_righe} righe.")
 # Try to extract some statistics
 type_proto_counts = clean_df.groupby('type')['proto'].value_counts().unstack(fill_value=0)
 print(type_proto_counts)
+
+#Data analisys
+
+# 1. Raggruppamento in macro-classi (Benevolent vs Malevolent)
+# Mappiamo i vari tipi di attacchi specifici in una singola categoria 'Malevolent',
+# e il traffico 'normal' in 'Benevolent'.
+category_mapping = {
+    'normal': 'Benevolent',
+    'backdoor': 'Malevolent',
+    'ddos': 'Malevolent',
+    'dos': 'Malevolent',
+    'injection': 'Malevolent',
+    'mitm': 'Malevolent',
+    'password': 'Malevolent',
+    'ransomware': 'Malevolent',
+    'scanning': 'Malevolent',
+    'xss': 'Malevolent'
+}
+
+# Applichiamo la mappatura sovrascrivendo la colonna 'type'
+clean_df['type'] = clean_df['type'].replace(category_mapping)
