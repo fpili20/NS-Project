@@ -1,30 +1,36 @@
-def classify_tcp(features, threshold):
-    # Il TCP AUMENTA durante gli attacchi di questo dataset
-    return "Malevolent" if features['tcp'] > threshold else "Benevolent"
-
-
-def classify_udp(features, threshold):
-    # L'UDP DIMINUISCE (viene diluito) durante gli attacchi TCP
-    return "Malevolent" if features['udp'] < threshold else "Benevolent"
-
-
-def classify_icmp(features, threshold):
-    # L'ICMP DIMINUISCE (viene diluito) durante gli attacchi TCP
-    return "Malevolent" if features['icmp'] < threshold else "Benevolent"
-
-
-def classify_multi(features, thresholds):
+def evaluate_rule(val, rule):
     """
-    Classificatore combinato NTC.
-    Valuta simultaneamente le variazioni anomale dei 3 protocolli.
-    Se anche un solo protocollo supera la sua soglia critica (in eccesso o in difetto),
-    il blocco viene etichettato come anomalo (Malevolent).
+    Motore logico adattivo.
+    Applica dinamicamente '>' o '<' in base a quanto appreso dall'optimizer.
     """
-    is_mal_tcp = features['tcp'] > thresholds['tcp']
-    is_mal_udp = features['udp'] < thresholds['udp']
-    is_mal_icmp = features['icmp'] < thresholds['icmp']
+    if rule['direction'] == 'greater':
+        return val > rule['threshold']
+    else:
+        return val < rule['threshold']
 
-    # Logica OR: Basta un'anomalia per far scattare l'allarme
+
+def classify_tcp(features, rule):
+    return "Malevolent" if evaluate_rule(features['tcp'], rule) else "Benevolent"
+
+
+def classify_udp(features, rule):
+    return "Malevolent" if evaluate_rule(features['udp'], rule) else "Benevolent"
+
+
+def classify_icmp(features, rule):
+    return "Malevolent" if evaluate_rule(features['icmp'], rule) else "Benevolent"
+
+
+def classify_multi(features, rules):
+    """
+    Classificatore combinato NTC (Multi-Soglia).
+    Valuta simultaneamente i 3 protocolli applicando le regole adattive.
+    """
+    is_mal_tcp = evaluate_rule(features['tcp'], rules['tcp'])
+    is_mal_udp = evaluate_rule(features['udp'], rules['udp'])
+    is_mal_icmp = evaluate_rule(features['icmp'], rules['icmp'])
+
+    # Logica OR: se anche un solo protocollo mostra un'anomalia, il blocco è malevolo
     if is_mal_tcp or is_mal_udp or is_mal_icmp:
         return "Malevolent"
 
