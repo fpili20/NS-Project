@@ -26,7 +26,7 @@ def main():
     tcp_normal = [f['tcp'] for f in feat_normal]
     tcp_malevolent = [f['tcp'] for f in feat_malevolent]
     # Scommenta la riga sotto per vedere il grafico
-    # plot_proto_percentages(tcp_normal, tcp_malevolent, 'tcp')
+    plot_proto_percentages(tcp_normal, tcp_malevolent, 'tcp')
 
     # 4. Creazione dataset di test combinato per l'ottimizzatore e le metriche
     all_features = feat_normal + feat_malevolent
