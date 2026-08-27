@@ -2,7 +2,7 @@ import config
 from data_loader import load_and_preprocess, create_subsets
 from features import get_all_features, plot_proto_percentages
 from optimizer import find_best_threshold
-from classifiers import classify_tcp
+from classifiers import classify_tcp, classify_udp, classify_icmp, classify_multi
 from metrics import calculate_metrics
 
 
@@ -35,37 +35,44 @@ def main():
     # 5. Ottimizzazione Soglia Automatica e Generazione Grafici
     print("\n--- Avvio Ottimizzatore Analitico ---")
 
-    # Calcolo soglia TCP e salvataggio grafico
     optimal_tcp_thresh = find_best_threshold(all_features, true_labels, protocol='tcp', show_plot=True)
-
-    # Calcolo soglia UDP e salvataggio grafico
     optimal_udp_thresh = find_best_threshold(all_features, true_labels, protocol='udp', show_plot=True)
-
-    # Calcolo soglia ICMP e salvataggio grafico
     optimal_icmp_thresh = find_best_threshold(all_features, true_labels, protocol='icmp', show_plot=True)
 
-    # 6. Classificazione con il Multi-Threshold (che hai in classifiers.py)
-    print("\n--- Classificazione Multi-Soglia Combinata ---")
-
-    # Prepariamo il dizionario delle soglie da passare al classificatore
+    # 6. Preparazione Soglie per Classificazione Multi-Soglia
     dynamic_thresholds = {
         'tcp': optimal_tcp_thresh,
         'udp': optimal_udp_thresh,
         'icmp': optimal_icmp_thresh
     }
 
-    # Ora passiamo a classify_multi sia le feature che le 3 soglie calcolate dinamicamente
-    # predictions = [classify_multi(f, dynamic_thresholds) for f in all_features]
+    # 7. Classificazione e Valutazione
+    print("\n--- Fase di Classificazione e Valutazione ---")
 
-    # 6. Classificazione con la soglia ottimizzata
-    print(f"\n--- Classificazione (Soglia TCP: {optimal_tcp_thresh}) ---")
-    predictions = [classify_tcp(f, optimal_tcp_thresh) for f in all_features]
+    preds_tcp = []
+    preds_udp = []
+    preds_icmp = []
+    preds_multi = []
 
-    # 7. Calcolo Metriche
-    results = calculate_metrics(true_labels, predictions)
-    print("\nRisultati della Classificazione:")
-    for key, value in results.items():
-        print(f"- {key}: {value}")
+    # Il processo alle intenzioni: i classificatori valutano ogni subset
+    for feat in all_features:
+        preds_tcp.append(classify_tcp(feat, dynamic_thresholds['tcp']))
+        preds_udp.append(classify_udp(feat, dynamic_thresholds['udp']))
+        preds_icmp.append(classify_icmp(feat, dynamic_thresholds['icmp']))
+        preds_multi.append(classify_multi(feat, dynamic_thresholds))
+
+    # 8. Stampa a confronto le metriche
+    print("\n[Risultati Classificatore Singolo - Solo TCP]")
+    print(calculate_metrics(true_labels, preds_tcp))
+
+    print("\n[Risultati Classificatore Singolo - Solo UDP]")
+    print(calculate_metrics(true_labels, preds_udp))
+
+    print("\n[Risultati Classificatore Singolo - Solo ICMP]")
+    print(calculate_metrics(true_labels, preds_icmp))
+
+    print("\n[Risultati Classificatore Combinato - MULTI-SOGLIA]")
+    print(calculate_metrics(true_labels, preds_multi))
 
 
 if __name__ == "__main__":

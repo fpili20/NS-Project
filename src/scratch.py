@@ -1,6 +1,8 @@
 import pandas as pd
 import os
 
+from matplotlib import pyplot as plt
+
 # Opzione 1: Percorso relativo (più semplice)
 # ".." significa "torna indietro di una cartella" (esce da src e va in NS-Project)
 # "/data/" ti fa entrare nella cartella dei dati
@@ -107,11 +109,9 @@ def plot_proto_percentages(subset_numbers_n, percent_normal, subset_numbers_m, p
     plt.show()
 
 
-# Richiamiamo la funzione per mostrare il grafico (necessario aver estratto prima i dati)
-# Commentato per evitare blocchi dell'esecuzione se non c'è output visivo.
-# plot_proto_percentages(range(len(percent_tcp_normal)), percent_tcp_normal,
-#                        range(len(percent_tcp_malevolent)), percent_tcp_malevolent, 'tcp')
-
+# Richiamiamo la funzione per mostrare il grafico
+plot_proto_percentages(range(len(percent_tcp_normal)), percent_tcp_normal,
+                       range(len(percent_tcp_malevolent)), percent_tcp_malevolent, 'tcp')
 
 # ==========================================
 # STEP 3: Development of an NTC

@@ -1,22 +1,26 @@
 import pandas as pd
-from config import CATEGORY_MAPPING, SUBSET_SIZE
+from config import CATEGORY_MAPPING, SUBSET_SIZE, PROTO_COL, TARGET_COL
 
 
 def load_and_preprocess(file_path):
     try:
+        # 1. Carica il file
         traffic_df = pd.read_csv(file_path)
         traffic_df = traffic_df.sort_index(axis=1)
 
         print(f"[Data Loader] Dataset caricato! Dimensioni: {traffic_df.shape}")
 
-        # Shuffling per evitare pattern sequenziali
+        # 2. Shuffling per evitare pattern sequenziali
         traffic_df = traffic_df.sample(frac=1, random_state=42).reset_index(drop=True)
 
-        # Isoliamo i campi utili
-        clean_df = traffic_df[["proto", "type", "label"]].copy()
+        # 3. Estrazione dinamica: Prende solo la colonna del protocollo e quella del target lette da config.py
+        clean_df = traffic_df[[PROTO_COL, TARGET_COL]].copy()
 
-        # Mappatura in macro-classi
-        clean_df['type'] = clean_df['type'].replace(CATEGORY_MAPPING)
+        # 4. Mappatura dinamica: Trasforma gli attacchi in Malevolent e il traffico lecito in Benevolent
+        clean_df[TARGET_COL] = clean_df[TARGET_COL].replace(CATEGORY_MAPPING)
+
+        # 5. Normalizzazione dei nomi delle colonne per far funzionare il resto del codice senza intoppi
+        clean_df = clean_df.rename(columns={PROTO_COL: 'proto', TARGET_COL: 'type'})
 
         return clean_df
 
@@ -26,7 +30,7 @@ def load_and_preprocess(file_path):
 
 
 def create_subsets(df, subset_size=SUBSET_SIZE):
-    # Separiamo in base alla classe
+    # La colonna ora si chiama in modo standardizzato 'type'
     df_benevolent = df[df['type'] == 'Benevolent']
     df_malevolent = df[df['type'] == 'Malevolent']
 
