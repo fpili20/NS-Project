@@ -4,7 +4,7 @@ import os
 # Opzione 1: Percorso relativo (più semplice)
 # ".." significa "torna indietro di una cartella" (esce da src e va in NS-Project)
 # "/data/" ti fa entrare nella cartella dei dati
-file_path = r"C:\NOSYNC\NS-Project\data\train_test_network .csv"
+file_path = r"../data/Train_Test_Network.csv"
 
 # 1. Importazione del dataset e creazione del DataFrame
 try:
