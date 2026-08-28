@@ -44,42 +44,31 @@ def load_and_preprocess(file_path=None):
             print(f"  - {str(proto).upper()}: {count} pacchetti")
         print("---------------------------------------------------\n")
 
-        # Shuffling per evitare pattern sequenziali (riattivato)
+        # Shuffling globale (riattivato come richiesto)
         traffic_df = traffic_df.sample(frac=1, random_state=42).reset_index(drop=True)
         proto_col = config.PROTO_COL
         target_col = config.TARGET_COL
         mapping = config.CATEGORY_MAPPING
 
-        # Gestione valori mancanti nella colonna target (es. normali a NaN nei raw)
+        # Gestione valori mancanti
         if target_col in traffic_df.columns:
             traffic_df[target_col] = traffic_df[target_col].fillna('Normal')
         else:
-            # Fallback se il target_col configurato non esiste nel df
             target_col = 'attack_cat' if 'attack_cat' in traffic_df.columns else 'type'
             traffic_df[target_col] = traffic_df[target_col].fillna('Normal')
 
-        # Isoliamo i campi utili
         clean_df = traffic_df[[proto_col, target_col]].copy()
-
-        # Pulizia di eventuali spazi bianchi nelle stringhe delle categorie
         clean_df[target_col] = clean_df[target_col].astype(str).str.strip()
-
-        # SALVIAMO IL NOME ORIGINALE DELL'ATTACCO PRIMA DELLA MAPPATURA
         clean_df['original_type'] = clean_df[target_col].copy()
-
-        # Mappatura in macro-classi tramite il dizionario del profilo attivo
         clean_df[target_col] = clean_df[target_col].replace(mapping)
 
-        # Fallback basato sulla colonna label binaria (se presente nei raw di UNSW)
         if 'label' in traffic_df.columns:
             mask_normal = (traffic_df['label'] == 0)
             clean_df.loc[mask_normal, target_col] = 'Benevolent'
             mask_attack = (traffic_df['label'] > 0)
             clean_df.loc[mask_attack, target_col] = 'Malevolent'
 
-        # Normalizzazione finale dei nomi colonna per la pipeline
         clean_df = clean_df.rename(columns={proto_col: 'proto', target_col: 'type'})
-
         return clean_df
 
     except FileNotFoundError:
@@ -89,21 +78,18 @@ def load_and_preprocess(file_path=None):
         print(f"[ERRORE] Si è verificato un errore durante il caricamento: {e}")
         return None
 
-
 def create_subsets(df, subset_size=None):
+    """
+    Crea subset dividendoli dal dataframe globale GIA' MISTO.
+    CORREZIONE: non effettua più la separazione forzata pre-chunking.
+    I subset restituiti non sono divisi in liste "normali" e "malevoli",
+    perché la classificazione va fatta successivamente.
+    Restituisce un'unica lista di subset eterogenei.
+    """
     if subset_size is None:
         subset_size = config.SUBSET_SIZE
 
-    # Separiamo in base alla classe standardizzata 'type'
-    df_benevolent = df[df['type'] == 'Benevolent']
-    df_malevolent = df[df['type'] == 'Malevolent']
-
-    # Creiamo i subset
-    subsets_normal = [df_benevolent[i:i + subset_size] for i in range(0, len(df_benevolent), subset_size)]
-    subsets_malevolent = [df_malevolent[i:i + subset_size] for i in range(0, len(df_malevolent), subset_size)]
-
-    # Filtriamo i subset scartando quelli incompleti
-    subsets_normal = [s for s in subsets_normal if len(s) == subset_size]
-    subsets_malevolent = [s for s in subsets_malevolent if len(s) == subset_size]
-
-    return subsets_normal, subsets_malevolent
+    num_subsets = len(df) // subset_size
+    subsets = [df.iloc[i * subset_size : (i + 1) * subset_size] for i in range(num_subsets)]
+    
+    return subsets

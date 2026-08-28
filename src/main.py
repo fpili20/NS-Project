@@ -1,32 +1,24 @@
 import pandas as pd
 import config
-from data_loader import load_and_preprocess
+from data_loader import load_and_preprocess, create_subsets
 
 def main():
-    # 1. Caricamento Dati
+    # 1. Caricamento Dati e Shuffling Globale
     df = load_and_preprocess(config.FILE_PATH)
     if df is None:
         return
         
-    # 2. Segmentazione in Subset (Traffico MISTO ETEROGENEO, senza separazione artificiale)
-    subset_size = 500
-    num_subsets = len(df) // subset_size
-    df_trunc = df.iloc[:num_subsets * subset_size]
+    # 2. Creazione Subsets (dal dataframe misto, con shuffling globale)
+    subsets = create_subsets(df, config.SUBSET_SIZE)
 
-    # Otteniamo tutti i tipi originali per le colonne della matrice
-    unique_types = sorted(df['original_type'].unique())
-    
     # Inizializziamo i DataFrame
+    unique_types = sorted(df['original_type'].unique())
     matrix_benign = pd.DataFrame(0, index=['TP', 'TN', 'FP', 'FN'], columns=unique_types)
     matrix_malicious = pd.DataFrame(0, index=['TP', 'TN', 'FP', 'FN'], columns=unique_types)
 
-    # 3. Analisi Subset Eterogenei (Finestre Temporali)
-    for i in range(num_subsets):
-        subset = df_trunc.iloc[i * subset_size : (i + 1) * subset_size]
-        
-        # L'etichetta globale del subset eterogeneo è decisa a maggioranza
+    # 3. Analisi Subset (Classificazione Maggioritaria)
+    for subset in subsets:
         global_label = subset['type'].mode()[0]
-        
         type_counts = subset['original_type'].value_counts()
         
         for orig_type, count in type_counts.items():
