@@ -1,86 +1,64 @@
 import config
-from data_loader import load_and_preprocess, create_subsets
-from features import get_all_features, plot_proto_percentages
-from optimizer import find_best_threshold
-from classifiers import classify_tcp, classify_udp, classify_icmp, classify_multi
-from metrics import calculate_metrics, plot_custom_multiclass_matrix
-
-
+from data_loader import load_and_preprocess
 
 def main():
-    print("=== AVVIO PROGETTO NETWORK SECURITY ===")
-
-    # 1. Caricamento Dati
+    # 1 & 2. Caricamento Dati, Pulizia e Shuffling (eseguiti in data_loader)
     df = load_and_preprocess(config.FILE_PATH)
     if df is None:
         return
+        
+    # Mantieni esclusivamente le due colonne: protocollo ed etichetta originale (specifica tipologia)
+    # NB: Conserviamo anche 'type' (macro-categoria Benevolent/Malevolent generata dal loader)
+    #     in quanto necessaria per aggregare i TP/TN/FP/FN.
+    
+    # 3. Segmentazione in Subset (blocchi da esattamente 500 pacchetti)
+    subset_size = 500
+    num_subsets = len(df) // subset_size
+    df_trunc = df.iloc[:num_subsets * subset_size]
 
-    # 2. Creazione Subsets
-    subsets_normal, subsets_malevolent = create_subsets(df, config.SUBSET_SIZE)
-    print(f"Creati {len(subsets_normal)} subset Benevoli e {len(subsets_malevolent)} subset Malevoli.")
+    agg_benign = {'TP': 0, 'TN': 0, 'FP': 0, 'FN': 0}
+    agg_malicious = {'TP': 0, 'TN': 0, 'FP': 0, 'FN': 0}
 
-    # 3. Estrazione Features
-    feat_normal = get_all_features(subsets_normal)
-    feat_malevolent = get_all_features(subsets_malevolent)
+    # 4. Confronto e Matrici di Confusione Locali
+    for i in range(num_subsets):
+        subset = df_trunc.iloc[i * subset_size : (i + 1) * subset_size]
+        
+        # Etichetta globale basata sulla classificazione maggioritaria della macro-categoria
+        global_label = subset['type'].mode()[0]
+        actual_labels = subset['type']
+        
+        tp, tn, fp, fn = 0, 0, 0, 0
+        if global_label == 'Malevolent':
+            tp = (actual_labels == 'Malevolent').sum()
+            fp = (actual_labels == 'Benevolent').sum()
+            
+            # Aggregazione
+            agg_malicious['TP'] += tp
+            agg_malicious['TN'] += tn
+            agg_malicious['FP'] += fp
+            agg_malicious['FN'] += fn
+        else:
+            tn = (actual_labels == 'Benevolent').sum()
+            fn = (actual_labels == 'Malevolent').sum()
+            
+            # Aggregazione
+            agg_benign['TP'] += tp
+            agg_benign['TN'] += tn
+            agg_benign['FP'] += fp
+            agg_benign['FN'] += fn
 
-    # (Opzionale) Plot delle features TCP
-    tcp_normal = [f['tcp'] for f in feat_normal]
-    tcp_malevolent = [f['tcp'] for f in feat_malevolent]
-    # Scommenta la riga sotto per vedere il grafico
-    plot_proto_percentages(tcp_normal, tcp_malevolent, 'tcp')
+    # 5 & 6. Aggregazione e Output Esclusivo
+    print("\n=== MATRICE DI CONFUSIONE AGGREGATA: SUBSET BENEVOLI ===")
+    print(f"True Positive (TP): {agg_benign['TP']}")
+    print(f"True Negative (TN): {agg_benign['TN']}")
+    print(f"False Positive (FP): {agg_benign['FP']}")
+    print(f"False Negative (FN): {agg_benign['FN']}\n")
 
-    # 4. Creazione dataset combinato leggendo le etichette reali dalle feature
-    all_features = feat_normal + feat_malevolent
-    true_labels = [f['true_label'] for f in all_features]
-
-    # 5. Ottimizzazione Soglia Automatica e Generazione Grafici
-    print("\n--- Avvio Ottimizzatore Analitico ---")
-
-    optimal_tcp_thresh = find_best_threshold(all_features, true_labels, protocol='tcp', show_plot=True)
-    optimal_udp_thresh = find_best_threshold(all_features, true_labels, protocol='udp', show_plot=True)
-    optimal_icmp_thresh = find_best_threshold(all_features, true_labels, protocol='icmp', show_plot=True)
-
-    # 6. Preparazione Soglie per Classificazione Multi-Soglia
-    dynamic_thresholds = {
-        'tcp': optimal_tcp_thresh,
-        'udp': optimal_udp_thresh,
-        'icmp': optimal_icmp_thresh
-    }
-
-    # 7. Classificazione e Valutazione
-    print("\n--- Fase di Classificazione e Valutazione ---")
-
-    preds_tcp = []
-    preds_udp = []
-    preds_icmp = []
-    preds_multi = []
-
-    # Il processo alle intenzioni: i classificatori valutano ogni subset
-    for feat in all_features:
-        preds_tcp.append(classify_tcp(feat, dynamic_thresholds['tcp']))
-        preds_udp.append(classify_udp(feat, dynamic_thresholds['udp']))
-        preds_icmp.append(classify_icmp(feat, dynamic_thresholds['icmp']))
-        preds_multi.append(classify_multi(feat, dynamic_thresholds))
-
-    # 8. Stampa a confronto le metriche
-    print("\n[Risultati Classificatore Singolo - Solo TCP]")
-    print(calculate_metrics(true_labels, preds_tcp))
-
-    print("\n[Risultati Classificatore Singolo - Solo UDP]")
-    print(calculate_metrics(true_labels, preds_udp))
-
-    print("\n[Risultati Classificatore Singolo - Solo ICMP]")
-    print(calculate_metrics(true_labels, preds_icmp))
-
-    print("\n[Risultati Classificatore Combinato - MULTI-SOGLIA]")
-    print(calculate_metrics(true_labels, preds_multi))
-
-    plot_custom_multiclass_matrix(all_features, preds_multi, title="NTC Breakdown: Volumetric vs Stealth Attacks")
-
-    print("\n[Risultati Classificatore Combinato - MULTI-SOGLIA (Binario Globale)]")
-    print(calculate_metrics(true_labels, preds_multi))
-
-
+    print("=== MATRICE DI CONFUSIONE AGGREGATA: SUBSET MALEVOLI ===")
+    print(f"True Positive (TP): {agg_malicious['TP']}")
+    print(f"True Negative (TN): {agg_malicious['TN']}")
+    print(f"False Positive (FP): {agg_malicious['FP']}")
+    print(f"False Negative (FN): {agg_malicious['FN']}")
 
 if __name__ == "__main__":
     main()

@@ -44,10 +44,8 @@ def load_and_preprocess(file_path=None):
             print(f"  - {str(proto).upper()}: {count} pacchetti")
         print("---------------------------------------------------\n")
 
-        # Shuffling per evitare pattern sequenziali
-        traffic_df = traffic_df.sample(frac=1, random_state=42).reset_index(drop=True)
-
-        # Identifichiamo dinamicamente le colonne dal config attivo
+        # Rimosso lo shuffling per preservare le raffiche sequenziali di attacchi
+        # traffic_df = traffic_df.sample(frac=1, random_state=42).reset_index(drop=True)
         proto_col = config.PROTO_COL
         target_col = config.TARGET_COL
         mapping = config.CATEGORY_MAPPING
