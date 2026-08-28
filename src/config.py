@@ -56,10 +56,10 @@ UNSW_NB15_RAW_COLUMNS = [
 ]
 
 UNSW_RAW_CONFIG = {
-    'file_path': r"../data/UNSW-NB15_1.csv",
+    #'file_path': r"../data/UNSW-NB15_1.csv",
     #'file_path': r"../data/UNSW-NB15_2.csv",
     #'file_path': r"../data/UNSW-NB15_3.csv",
-    #'file_path': r"../data/UNSW-NB15_4.csv",
+    'file_path': r"../data/UNSW-NB15_4.csv",
     'has_header': False,
     'names': UNSW_NB15_RAW_COLUMNS,
     'target_col': 'attack_cat',
@@ -86,11 +86,10 @@ UNSW_RAW_CONFIG = {
 # ---------------------------------------------------------
 # PROFILO ATTIVO (Scegli quale attivare decommentando la riga)
 # ---------------------------------------------------------
-ACTIVE_PROFILE = UNSW_PROCESSED_CONFIG
-#ACTIVE_PROFILE = TON_IOT_CONFIG
+#ACTIVE_PROFILE = UNSW_PROCESSED_CONFIG
+ACTIVE_PROFILE = TON_IOT_CONFIG
 #ACTIVE_PROFILE = UNSW_RAW_CONFIG
 
-# Parametri di raggruppamento e variabili esportate lette dagli altri moduli
 SUBSET_SIZE = 500
 FILE_PATH = ACTIVE_PROFILE['file_path']
 HAS_HEADER = ACTIVE_PROFILE.get('has_header', True)
