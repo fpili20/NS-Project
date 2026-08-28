@@ -7,7 +7,7 @@ import os
 # 1. Configurazione Globale
 # ==========================================
 WINDOW_SIZES = [10, 25, 50, 100, 250, 500, 750, 1000, 1500, 2000]
-PROTOCOL_TO_ANALYZE = 'icmp'
+PROTOCOL_TO_ANALYZE = 'tcp'
 
 UNSW_RAW_COLUMNS = [
     "srcip", "sport", "dstip", "dsport", "proto", "state", "dur", "sbytes", "dbytes",
@@ -30,25 +30,17 @@ MAPPING = {
 }
 
 DATASETS = [
-    # 1. ToN_IoT
-    {'name': 'ToN_IoT', 'path': r'../data/Train_Test_Network.csv', 'has_header': True, 'target': 'type'},
-
-    # 2. UNSW-NB15 Processed (Train & Test)
-    {'name': 'UNSW (Train)', 'path': r'../data/UNSW_NB15_training-set.csv', 'has_header': True, 'target': 'attack_cat'},
-    {'name': 'UNSW (Test)', 'path': r'../data/UNSW_NB15_testing-set.csv', 'has_header': True, 'target': 'attack_cat'},
-
-    # 3. UNSW-NB15 Raw Files
-    {'name': 'UNSW Raw 1', 'path': r'../data/UNSW-NB15_1.csv', 'has_header': False, 'target': 'attack_cat'},
-    {'name': 'UNSW Raw 2', 'path': r'../data/UNSW-NB15_2.csv', 'has_header': False, 'target': 'attack_cat'},
-    {'name': 'UNSW Raw 3', 'path': r'../data/UNSW-NB15_3.csv', 'has_header': False, 'target': 'attack_cat'},
-    {'name': 'UNSW Raw 4', 'path': r'../data/UNSW-NB15_4.csv', 'has_header': False, 'target': 'attack_cat'}
+    {'name': 'UNSW-NB15 (Raw)', 'path': r'../data/UNSW-NB15_1.csv', 'has_header': False, 'target': 'attack_cat'},
+    {'name': 'UNSW-NB15 (Processed)', 'path': r'../data/UNSW_NB15_testing-set.csv', 'has_header': True,
+     'target': 'attack_cat'},
+    {'name': 'ToN_IoT', 'path': r'../data/Train_Test_Network.csv', 'has_header': True, 'target': 'type'}
 ]
 
 # ==========================================
 # 2. Motore di Estrazione e Calcolo
 # ==========================================
 plt.figure(figsize=(12, 7))
-colors = ['darkorange', 'royalblue', 'forestgreen', 'crimson', 'purple', 'teal', 'saddlebrown']
+colors = ['darkorange', 'royalblue', 'forestgreen']
 
 for idx, ds in enumerate(DATASETS):
     if not os.path.exists(ds['path']):

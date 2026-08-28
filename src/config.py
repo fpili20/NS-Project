@@ -92,7 +92,7 @@ UNSW_RAW_CONFIG = {
 ACTIVE_PROFILE = UNSW_RAW_CONFIG
 
 # Parametri di raggruppamento e variabili esportate lette dagli altri moduli
-SUBSET_SIZE = 1000
+SUBSET_SIZE = 500
 FILE_PATH = ACTIVE_PROFILE['file_path']
 HAS_HEADER = ACTIVE_PROFILE.get('has_header', True)
 COLUMN_NAMES = ACTIVE_PROFILE.get('names', None)
