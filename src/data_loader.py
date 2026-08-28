@@ -66,6 +66,9 @@ def load_and_preprocess(file_path=None):
         # Pulizia di eventuali spazi bianchi nelle stringhe delle categorie
         clean_df[target_col] = clean_df[target_col].astype(str).str.strip()
 
+        # SALVIAMO IL NOME ORIGINALE DELL'ATTACCO PRIMA DELLA MAPPATURA
+        clean_df['original_type'] = clean_df[target_col].copy()
+
         # Mappatura in macro-classi tramite il dizionario del profilo attivo
         clean_df[target_col] = clean_df[target_col].replace(mapping)
 

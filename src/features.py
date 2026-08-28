@@ -2,19 +2,25 @@ import matplotlib.pyplot as plt
 
 
 def extract_protocol_percentages(subset):
-    """Estrae le percentuali di TCP, UDP e ICMP da un singolo subset"""
+    """Estrae le percentuali di TCP, UDP e ICMP e conserva l'etichetta originale"""
     total_pkts = len(subset)
     if total_pkts == 0:
-        return {'tcp': 0.0, 'udp': 0.0, 'icmp': 0.0}
+        return {'tcp': 0.0, 'udp': 0.0, 'icmp': 0.0, 'original_type': 'Unknown', 'true_label': 'Unknown'}
 
     tcp_pkts = len(subset[subset['proto'] == 'tcp'])
     udp_pkts = len(subset[subset['proto'] == 'udp'])
     icmp_pkts = len(subset[subset['proto'] == 'icmp'])
 
+    # Estrae l'etichetta dell'attacco più frequente in questo subset da 500 pacchetti
+    orig_type = subset['original_type'].mode()[0] if 'original_type' in subset.columns else 'Unknown'
+    bin_type = subset['type'].mode()[0] if 'type' in subset.columns else 'Unknown'
+
     return {
         'tcp': tcp_pkts / total_pkts,
         'udp': udp_pkts / total_pkts,
-        'icmp': icmp_pkts / total_pkts
+        'icmp': icmp_pkts / total_pkts,
+        'original_type': orig_type,
+        'true_label': bin_type
     }
 
 

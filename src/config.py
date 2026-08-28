@@ -25,7 +25,6 @@ TON_IOT_CONFIG = {
 # ==========================================
 UNSW_PROCESSED_CONFIG = {
     'file_path': r"../data/UNSW_NB15_testing-set.csv",
-    #'file_path': r"../data/UNSW_NB15_training-set.csv",
     'has_header': True,
     'target_col': 'attack_cat',
     'proto_col': 'proto',
@@ -57,10 +56,10 @@ UNSW_NB15_RAW_COLUMNS = [
 ]
 
 UNSW_RAW_CONFIG = {
-    #'file_path': r"../data/UNSW-NB15_1.csv",
+    'file_path': r"../data/UNSW-NB15_1.csv",
     #'file_path': r"../data/UNSW-NB15_2.csv",
     #'file_path': r"../data/UNSW-NB15_3.csv",
-    'file_path': r"../data/UNSW-NB15_4.csv",
+    #'file_path': r"../data/UNSW-NB15_4.csv",
     'has_header': False,
     'names': UNSW_NB15_RAW_COLUMNS,
     'target_col': 'attack_cat',

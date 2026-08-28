@@ -28,9 +28,9 @@ def main():
     # Scommenta la riga sotto per vedere il grafico
     plot_proto_percentages(tcp_normal, tcp_malevolent, 'tcp')
 
-    # 4. Creazione dataset di test combinato per l'ottimizzatore e le metriche
+    # 4. Creazione dataset combinato leggendo le etichette reali dalle feature
     all_features = feat_normal + feat_malevolent
-    true_labels = ["Benevolent"] * len(feat_normal) + ["Malevolent"] * len(feat_malevolent)
+    true_labels = [f['true_label'] for f in all_features]
 
     # 5. Ottimizzazione Soglia Automatica e Generazione Grafici
     print("\n--- Avvio Ottimizzatore Analitico ---")
@@ -73,6 +73,14 @@ def main():
 
     print("\n[Risultati Classificatore Combinato - MULTI-SOGLIA]")
     print(calculate_metrics(true_labels, preds_multi))
+
+    print("\n[Risultati Classificatore Combinato - MULTI-SOGLIA (Binario Globale)]")
+    print(calculate_metrics(true_labels, preds_multi))
+
+    # NUOVA STAMPA: Tabella di scomposizione per tipo di attacco
+    from metrics import calculate_multiclass_metrics
+    print("\n[Analisi Critica ONE-VS-ALL - Breakdown per classe di attacco]")
+    calculate_multiclass_metrics(all_features, preds_multi)
 
 
 if __name__ == "__main__":
