@@ -1,3 +1,8 @@
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+
 def calculate_metrics(true_labels, predicted_labels):
     TP = TN = FP = FN = 0
 
@@ -22,6 +27,30 @@ def calculate_metrics(true_labels, predicted_labels):
         'Recall': round(recall, 4),
         'Accuracy': round(accuracy, 4)
     }
+
+
+def plot_ntc_confusion_matrix(true_labels, predicted_labels, title="Confusion Matrix"):
+    """
+    Genera e mostra una matrice di confusione grafica per il classificatore binario.
+    """
+    # Definiamo esplicitamente le label attese dal nostro modello
+    labels = ["Benevolent", "Malevolent"]
+
+    # Calcoliamo la matrice usando scikit-learn
+    cm = confusion_matrix(true_labels, predicted_labels, labels=labels)
+
+    # Setup del grafico
+    plt.figure(figsize=(7, 5))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues",
+                xticklabels=labels, yticklabels=labels,
+                cbar=False, annot_kws={"size": 14, "weight": "bold"})
+
+    plt.title(title, fontsize=14, fontweight='bold', pad=15)
+    plt.ylabel('True Class', fontsize=12, fontweight='bold')
+    plt.xlabel('Predicted Class', fontsize=12, fontweight='bold')
+
+    plt.tight_layout()
+    plt.show()
 
 
 def calculate_multiclass_metrics(features_list, predicted_labels):

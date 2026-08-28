@@ -3,7 +3,8 @@ from data_loader import load_and_preprocess, create_subsets
 from features import get_all_features, plot_proto_percentages
 from optimizer import find_best_threshold
 from classifiers import classify_tcp, classify_udp, classify_icmp, classify_multi
-from metrics import calculate_metrics
+from metrics import calculate_metrics, plot_ntc_confusion_matrix
+import numpy as np
 
 
 def main():
@@ -73,6 +74,10 @@ def main():
 
     print("\n[Risultati Classificatore Combinato - MULTI-SOGLIA]")
     print(calculate_metrics(true_labels, preds_multi))
+
+    # --- NUOVA RIGA PER LA MATRICE DI CONFUSIONE ---
+    preds_multi_flat = np.array(preds_multi).flatten()
+    plot_ntc_confusion_matrix(true_labels, preds_multi_flat, title="NTC Multi-Threshold Confusion Matrix")
 
     print("\n[Risultati Classificatore Combinato - MULTI-SOGLIA (Binario Globale)]")
     print(calculate_metrics(true_labels, preds_multi))
