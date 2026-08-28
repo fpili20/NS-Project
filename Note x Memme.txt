@@ -1,0 +1,41 @@
+Ho messo il dataset in .gitignore così git non si rallenta controllando il dataset che è sempre lo stesso ogni commit e push.
+L'idea è di fare la directory così
+NS_MultiThreshold_Project/
+│
+├── data/
+│   └── train_test_network.csv         <-- I tuoi dati (NON versionarli su Git)
+│
+├── notebooks/
+│   └── 01_data_analysis.ipynb         <-- Per calcolare le soglie e fare i grafici
+│
+├── src/                               <-- Cartella del codice sorgente
+│   ├── __init__.py                    <-- Rende 'src' un modulo Python
+│   ├── config.py                      <-- Variabili globali (soglie, dimensioni subset)
+│   ├── data_loader.py                 <-- Logica di import, mappatura e shuffling
+│   ├── features.py                    <-- Estrazione simultanea di % TCP, UDP, ICMP
+│   ├── classifiers.py                 <-- Le 4 funzioni di classificazione (TCP, UDP, ICMP, Multi)
+│   ├── metrics.py                     <-- Calcolo TP, TN, FP, FN, Precision, Recall
+│   └── main.py                        <-- Lo script orchestratore che richiama gli altri moduli
+│
+├── README.md                          <-- Documentazione per il professore (in Inglese)
+└── requirements.txt                   <-- Elenco delle librerie (pandas, numpy, matplotlib)
+
+La roadmap che mi ha consigliato gemini è:
+L'idea di partire dai classificatori singoli per arrivare a quello combinato è ottima sia per lo sviluppo che per la narrativa della tua relazione.
+
+Fase 1: Preparazione e Architettura (Setup)
+- Strutturare le cartelle e i moduli Python.
+- Sviluppare il modulo di caricamento e pulizia dati (data_loader).
+
+Fase 2: Analisi Statistica Esplorativa (EDA)
+- Usare un Jupyter Notebook isolato per trovare le medie esatte di TCP, UDP e ICMP per il traffico benevolo e malevolo.
+- Definire scientificamente i valori di soglia (T_TCP, T_UDP, T_ICMP).
+
+Fase 3: Sviluppo Modulare (Core)
+- Creare la logica di estrazione delle feature in un unico passaggio (features.py).
+- Implementare i 3 classificatori indipendenti (solo TCP, solo UDP, solo ICMP).
+- Implementare il classificatore multi-soglia che li unisce.
+
+Fase 4: Valutazione Avanzata (Evaluation)
+- Sviluppare il modulo di calcolo delle metriche (Accuracy, Precision, Recall, FPR).
+- Confrontare i 4 modelli (TCP vs UDP vs ICMP vs Multi-soglia) per dimostrare matematicamente che l'approccio combinato è superiore.
