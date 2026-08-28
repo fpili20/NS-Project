@@ -86,9 +86,9 @@ UNSW_RAW_CONFIG = {
 # ---------------------------------------------------------
 # PROFILO ATTIVO (Scegli quale attivare decommentando la riga)
 # ---------------------------------------------------------
-#ACTIVE_PROFILE = UNSW_PROCESSED_CONFIG
+ACTIVE_PROFILE = UNSW_PROCESSED_CONFIG
 #ACTIVE_PROFILE = TON_IOT_CONFIG
-ACTIVE_PROFILE = UNSW_RAW_CONFIG
+#ACTIVE_PROFILE = UNSW_RAW_CONFIG
 
 # Parametri di raggruppamento e variabili esportate lette dagli altri moduli
 SUBSET_SIZE = 500

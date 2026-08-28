@@ -3,8 +3,8 @@ from data_loader import load_and_preprocess, create_subsets
 from features import get_all_features, plot_proto_percentages
 from optimizer import find_best_threshold
 from classifiers import classify_tcp, classify_udp, classify_icmp, classify_multi
-from metrics import calculate_metrics, plot_ntc_confusion_matrix
-import numpy as np
+from metrics import calculate_metrics, plot_custom_multiclass_matrix
+
 
 
 def main():
@@ -75,17 +75,11 @@ def main():
     print("\n[Risultati Classificatore Combinato - MULTI-SOGLIA]")
     print(calculate_metrics(true_labels, preds_multi))
 
-    # --- NUOVA RIGA PER LA MATRICE DI CONFUSIONE ---
-    preds_multi_flat = np.array(preds_multi).flatten()
-    plot_ntc_confusion_matrix(true_labels, preds_multi_flat, title="NTC Multi-Threshold Confusion Matrix")
+    plot_custom_multiclass_matrix(all_features, preds_multi, title="NTC Breakdown: Volumetric vs Stealth Attacks")
 
     print("\n[Risultati Classificatore Combinato - MULTI-SOGLIA (Binario Globale)]")
     print(calculate_metrics(true_labels, preds_multi))
 
-    # NUOVA STAMPA: Tabella di scomposizione per tipo di attacco
-    from metrics import calculate_multiclass_metrics
-    print("\n[Analisi Critica ONE-VS-ALL - Breakdown per classe di attacco]")
-    calculate_multiclass_metrics(all_features, preds_multi)
 
 
 if __name__ == "__main__":
